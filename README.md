@@ -1,8 +1,8 @@
-# TCSVDataSource
-CSV parser for Delphi Free
+# TObject - TCSVDataSource
+CSV parser for Delphi Free. Fields as String, Integer or Extended.
 
 # Usage:
-
+```
   var Source: TCSVDataSource;
 
   Source := TCSVDataSource.Create;
@@ -21,3 +21,4 @@ CSV parser for Delphi Free
     Source.Free;
   end;
   end;
+```
