@@ -1,13 +1,13 @@
 // @title CSV Parser to DataSource
 // @author Lukáš Vlček
-// @licence GNU Public Licence 3.0
+// @licence GNU General Public Licence 3.0
 
 unit uCSVDataSource;
 
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils, Windows;
 
 type
   TCSVDataSource = class(TObject)
@@ -17,16 +17,20 @@ type
       _delimiter: Char;
       _index: Integer;
       _feof: Boolean;
+      _date_separator: Char;
     public
       constructor Create();
       procedure LoadFromFile(const FileName: ShortString);
       procedure SetDelimiter(const Character: Char);
+      procedure SetDateSeparator(const Separator: Char);
       procedure First;
       function GetTotal(): Integer;
       function GetRowString(): String;
       function FieldByNameAsString(Column: ShortString): String;
       function FieldByNameAsInteger(Column: ShortString): Integer;
       function FieldByNameAsFloat(Column: ShortString): Extended;
+      function FieldByNameAsDate(Column: ShortString): TDate;
+      function FieldByNameAsTime(Column: ShortString): TTime;
       procedure Next;
       property Eof: Boolean read _feof;
     private
@@ -43,6 +47,7 @@ begin
   Self._columns.Clear;
   Self._rows.Clear;
   Self._index := -1;
+  Self._date_separator := '-';
 end;
 
 procedure TCSVDataSource.LoadFromFile(const FileName: ShortString);
@@ -77,6 +82,11 @@ end;
 procedure TCSVDataSource.SetDelimiter(const Character: Char);
 begin
   Self._delimiter := Character;
+end;
+
+procedure TCSVDataSource.SetDateSeparator(const Separator: Char);
+begin
+  Self._date_separator := Separator;
 end;
 
 procedure TCSVDataSource.First;
@@ -142,6 +152,36 @@ begin
   Row.Delimiter := Self._delimiter;
   Row.DelimitedText := Self._rows.Strings[Self._index];
   Result := StrToFloatDef(Row.Strings[ColumnIndex], 0);
+end;
+
+function TCSVDataSource.FieldByNameAsDate(Column: ShortString): TDate;
+var
+  ColumnIndex: Integer;
+  Row: TStringList;
+  MySettings: TFormatSettings;
+begin
+  GetLocaleFormatSettings(LOCALE_SYSTEM_DEFAULT, MySettings);
+  MySettings.DateSeparator := Self._date_separator;
+
+  ColumnIndex := Self.GetColumnIndex(Column);
+  Row := TStringList.Create;
+  Row.StrictDelimiter := True;
+  Row.Delimiter := Self._delimiter;
+  Row.DelimitedText := Self._rows.Strings[Self._index];
+  Result := StrToDate(Row.Strings[ColumnIndex], MySettings);
+end;
+
+function TCSVDataSource.FieldByNameAsTime(Column: ShortString): TTime;
+var
+  ColumnIndex: Integer;
+  Row: TStringList;
+begin
+  ColumnIndex := Self.GetColumnIndex(Column);
+  Row := TStringList.Create;
+  Row.StrictDelimiter := True;
+  Row.Delimiter := Self._delimiter;
+  Row.DelimitedText := Self._rows.Strings[Self._index];
+  Result := StrToTime(Row.Strings[ColumnIndex]);
 end;
 
 procedure TCSVDataSource.Next;
