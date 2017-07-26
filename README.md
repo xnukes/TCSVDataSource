@@ -2,21 +2,22 @@
 CSV parser for Delphi Free
 
 # Usage:
-var Source: TCSVDataSource;
 
-Source := TCSVDataSource.Create;
-try
-  Source.SetDelimiter(Char(59)); // Delimiter = ;
-  Source.LoadFromFile('file.csv');
+  var Source: TCSVDataSource;
 
-  while not Source.Eof do
-  begin
+  Source := TCSVDataSource.Create;
+  try
+    Source.SetDelimiter(Char(59));
+    Source.LoadFromFile(FileName);
 
-    ShowMessage(Source.FieldByNameAsString('CARDHOLDER'));
+    while not Source.Eof do
+    begin
 
-    Source.Next;
+      ShowMessage(Source.FieldByNameAsString('CARDHOLDER'));
+
+      Source.Next;
+    end;
+  finally
+    Source.Free;
   end;
-finally
-  Source.Free;
-end;
-end;
+  end;
