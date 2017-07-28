@@ -1,6 +1,8 @@
-// @title CSV Parser to DataSource
-// @author Lukáš Vlček
-// @licence GNU General Public Licence 3.0
+{ ----------------------------------------------------- }
+{ @Unit Description:  CSV Parser to DataSource          }
+{ @Author:            Lukáš Vlček [xnukes@gmail.com]    }
+{ @Licence:           GNU General Public Licence 3.0    }
+{ ----------------------------------------------------- }
 
 unit uCSVDataSource;
 
@@ -31,8 +33,10 @@ type
       function FieldByNameAsFloat(Column: ShortString): Extended;
       function FieldByNameAsDate(Column: ShortString): TDate;
       function FieldByNameAsTime(Column: ShortString): TTime;
+      function FieldByNameAsDateTime(Column: ShortString): TDateTime;
       procedure Next;
       property Eof: Boolean read _feof;
+      property Count: Integer read GetTotal;
     private
       function GetColumnIndex(Column: ShortString): Integer;
     published
@@ -182,6 +186,23 @@ begin
   Row.Delimiter := Self._delimiter;
   Row.DelimitedText := Self._rows.Strings[Self._index];
   Result := StrToTime(Row.Strings[ColumnIndex]);
+end;
+
+function TCSVDataSource.FieldByNameAsDateTime(Column: ShortString): TDateTime;
+var
+  ColumnIndex: Integer;
+  Row: TStringList;
+  MySettings: TFormatSettings;
+begin
+  GetLocaleFormatSettings(LOCALE_SYSTEM_DEFAULT, MySettings);
+  MySettings.DateSeparator := Self._date_separator;
+
+  ColumnIndex := Self.GetColumnIndex(Column);
+  Row := TStringList.Create;
+  Row.StrictDelimiter := True;
+  Row.Delimiter := Self._delimiter;
+  Row.DelimitedText := Self._rows.Strings[Self._index];
+  Result := StrToDateTime(Row.Strings[ColumnIndex], MySettings);
 end;
 
 procedure TCSVDataSource.Next;
